@@ -1,54 +1,46 @@
-import { RedisCache } from 'apollo-server-cache-redis';
-import { KeyValueCacheSetOptions } from 'apollo-server-caching';
 import md5 from 'md5';
-import { CacheInterface } from './interface';
+import { CacheInterface, KeyValueCacheSetOptions } from './interface';
+
+export interface RedisClient
+  extends Omit<CacheInterface, 'getKey' | 'mget' | 'mset'> {
+  client: { mget: any; mset: any; multi: any };
+}
 
 /**
- * Wrapper class for RedisCache
- * This class allows us to use Redis's primary and reader endpoints for caching
+ * Wrapper class for apollo's RedisCache
+ * This class allows us to use Elasticache Redis's primary and reader endpoints for caching
  */
-export class Redis implements CacheInterface {
-  private primaryClient: RedisCache;
-  private readerClient: RedisCache;
-  private static PORT = 6379;
-
+export class ElasticacheRedis implements CacheInterface {
   /**
    * Constructs a RedisCache instance for the primary and reader endpoints
-   * @param primaryEndpoint
-   * @param readerEndpoint
+   * @param primaryClient
+   * @param readerClient
    */
-  constructor(primaryEndpoint: string, readerEndpoint: string) {
-    this.primaryClient = new RedisCache({
-      host: primaryEndpoint.split(':')[0],
-      port: Redis.PORT,
-    });
-
-    this.readerClient = new RedisCache({
-      host: readerEndpoint.split(':')[0],
-      port: Redis.PORT,
-    });
-  }
+  constructor(
+    private primaryClient: RedisClient,
+    private readerClient: RedisClient
+  ) {}
 
   /**
    * Generates an md5 hashed cache key from key input
    * @param key
    */
   getKey(key: string): string {
-    return md5(key);
+    return md5(key) as string;
   }
 
   /**
    * Sets a single value to cache
    * @param key
-   * @param data
+   * @param value
    * @param options
    */
   async set(
     key: string,
-    data: string,
+    value: string,
     options?: KeyValueCacheSetOptions
   ): Promise<void> {
-    await this.primaryClient.set(key, data, options);
+    await this.primaryClient.set(key, value, options);
   }
 
   /**
@@ -77,11 +69,11 @@ export class Redis implements CacheInterface {
 
   /**
    * Gets multiple values from cache
-   * @param key
+   * @param keys
    */
-  async mget(key: string[]): Promise<string[]> {
+  async mget(keys: string[]): Promise<string[]> {
     // noinspection TypeScriptValidateJSTypes
-    return this.readerClient.client.mget(...key);
+    return this.readerClient.client.mget(...keys);
   }
 
   /**
