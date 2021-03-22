@@ -39,6 +39,7 @@
     "md5": "^2.3.0"
   },
   "publishConfig": {
+    "cache": "~/.npm",
     "registry": "https://npm.pkg.github.com/"
   },
   "release": {
