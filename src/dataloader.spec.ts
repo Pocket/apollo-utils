@@ -14,7 +14,6 @@ class FakeCache implements dataloader.LoaderCacheInterface {
   }
 }
 
-const cache = new FakeCache();
 const dataValues = [{ val: '1' }, { val: '2' }];
 
 describe('dataloader', () => {
