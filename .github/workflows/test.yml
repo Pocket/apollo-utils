@@ -1,0 +1,43 @@
+name: Run Tests
+
+#
+# Documentation:
+# https://help.github.com/en/articles/workflow-syntax-for-github-actions
+#
+
+#############################
+# Start the job on all push #
+#############################
+on:
+  push:
+    branches-ignore:
+      - 'main'
+
+###############
+# Set the Job #
+###############
+jobs:
+  build:
+    # Set the agent to run on
+    runs-on: ubuntu-latest
+
+    ##################
+    # Load all steps #
+    ##################
+    steps:
+      ##########################
+      # Checkout the code base #
+      ##########################
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      ##########################
+      # Setup NodeJs and run tests
+      ##########################
+      - name: Use Node.js 15.x
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 15.x
+      - run: npm install
+      - run: npm run build
+      - run: npm run test
