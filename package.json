@@ -1,6 +1,6 @@
 {
-  "name": "@pocket/apollo-utils",
-  "version": "1.0.0",
+  "name": "@pocket-tools/apollo-utils",
+  "version": "0.0.0-development",
   "description": "Utilities for implementing services",
   "main": "dist/src/index.js",
   "scripts": {
@@ -40,7 +40,7 @@
   },
   "publishConfig": {
     "cache": "~/.npm",
-    "registry": "https://npm.pkg.github.com/"
+    "access": "public"
   },
   "release": {
     "branches": [
