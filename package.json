@@ -1,7 +1,7 @@
 {
   "name": "@pocket-tools/apollo-utils",
   "version": "0.0.0-development",
-  "description": "Utilities for implementing services",
+  "description": "Utilities for apollo implementing services",
   "keywords": [
     "apollo",
     "dataloader",
