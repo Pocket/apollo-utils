@@ -2,7 +2,13 @@
   "name": "@pocket-tools/apollo-utils",
   "version": "0.0.0-development",
   "description": "Utilities for implementing services",
-  "main": "dist/src/index.js",
+  "keywords": [
+    "apollo",
+    "dataloader",
+    "cache"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
     "test:watch": "npm run test -- --watch",
