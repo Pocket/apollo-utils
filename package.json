@@ -41,7 +41,7 @@
     "@sentry/node": "^6.2.3",
     "apollo-client": "^2.6.10",
     "apollo-server-cache-redis": "^1.2.3",
-    "apollo-server-caching": "^0.5.3",
+    "apollo-server-caching": "^0.6.0",
     "md5": "^2.3.0"
   },
   "publishConfig": {
