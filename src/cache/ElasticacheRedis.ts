@@ -1,9 +1,16 @@
 import md5 from 'md5';
 import { CacheInterface, KeyValueCacheSetOptions } from './interface';
+import { RedisClient as ApolloRedisClient } from 'apollo-server-cache-redis';
 
 export interface RedisClient
   extends Omit<CacheInterface, 'getKey' | 'mget' | 'mset' | 'clear'> {
-  client: { mget: any; mset: any; multi: any };
+  // RedisCache updated the types and omitted properties from
+  // base redis client.
+  client: Omit<ApolloRedisClient, 'mget'> & {
+    mget?: any;
+    mset?: any;
+    multi?: any;
+  };
 }
 
 /**
