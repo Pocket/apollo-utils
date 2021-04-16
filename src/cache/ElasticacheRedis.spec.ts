@@ -2,7 +2,7 @@ import { ElasticacheRedis, RedisClient } from './ElasticacheRedis';
 import { KeyValueCacheSetOptions } from './interface';
 
 class FakePrimaryClient implements RedisClient {
-  client: { mget: any; mset: any; multi: any };
+  client: any;
 
   clear(): Promise<void> {
     return Promise.resolve(undefined);
