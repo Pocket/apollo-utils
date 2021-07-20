@@ -40,7 +40,7 @@
   "dependencies": {
     "@sentry/node": "^6.2.3",
     "apollo-client": "^2.6.10",
-    "apollo-server-cache-redis": "^1.2.3",
+    "apollo-server-cache-redis": "^3.0.2",
     "apollo-server-caching": "^0.7.0",
     "md5": "^2.3.0"
   },
