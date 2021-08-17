@@ -3,11 +3,11 @@ import * as Sentry from '@sentry/node';
 
 export const sentryPlugin = {
   //Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
-  requestDidStart(_: any): { didEncounterErrors(ctx: any): void } {
+  async requestDidStart() {
     /* Within this returned object, define functions that respond
        to request-specific lifecycle events. */
     return {
-      didEncounterErrors(ctx) {
+      async didEncounterErrors(ctx) {
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {
