@@ -10,9 +10,7 @@ import sinon from 'sinon';
 import * as Sentry from '@sentry/node';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 
-import {
-  ApolloServerPluginUsageReportingDisabled,
-} from 'apollo-server-core';
+import { ApolloServerPluginUsageReportingDisabled } from 'apollo-server-core';
 
 chai.use(deepEqualInAnyOrder);
 
