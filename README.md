@@ -21,6 +21,31 @@ const batchGetUsers = async (userInputs: UserInput[]): Promise<User[]> => {
 }
 ```
 
+## Sentry Plugin and Error Handler
+
+- Setting up plugin and error handler with the apollo server
+```typescript
+import {batchCacheFn} from "./dataloader";
+
+const server = new ApolloServer({
+  schema: buildFederatedSchema({ typeDefs, resolvers }),
+  plugins: [sentryPlugin],
+  formatError: errorHandler,
+});
+```
+
+- Throwing custom error:
+```typescript
+ throw new NotFoundError('book id');
+```
+- Throwing Apollo Errors
+
+```typescript
+import { UserInputError } from 'apollo-server-errors';
+
+throw new UserInputError('Invalid User Input');
+```
+
 ## Development
 1. `npm install`
 2. `npm run test` run tests or `npm run test:watch` to watch files and run tests when the code changes.
