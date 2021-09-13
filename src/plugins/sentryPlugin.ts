@@ -1,13 +1,23 @@
-import { ApolloError } from 'apollo-client';
 import * as Sentry from '@sentry/node';
+import { ApolloError } from 'apollo-client';
+import { ApolloServerPlugin } from 'apollo-server-plugin-base';
 
-export const sentryPlugin = {
-  //Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
-  async requestDidStart() {
+/**
+ * Plugin for handling errors.
+ * Logs the original error to console (for cloudwatch)
+ * and Sentry.
+ * This is only invoked if the graphql execution actually
+ * started, so it will not send errors that occurred while
+ * before the query could start (e.g. syntax error in graphql
+ * query sent by client)
+ */
+//Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
+export const sentryPlugin: ApolloServerPlugin = {
+  requestDidStart(_) {
     /* Within this returned object, define functions that respond
-       to request-specific lifecycle events. */
+                 to request-specific lifecycle events. */
     return {
-      async didEncounterErrors(ctx) {
+      didEncounterErrors(ctx) {
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {
@@ -39,13 +49,8 @@ export const sentryPlugin = {
               });
             }
 
-            const transactionId = ctx.request.http.headers.get(
-              'x-transaction-id'
-            );
-            if (transactionId) {
-              scope.setTransaction(transactionId);
-            }
-
+            //logs error to cloudwatch and sentry
+            console.log(err);
             Sentry.captureException(err);
           });
         }
