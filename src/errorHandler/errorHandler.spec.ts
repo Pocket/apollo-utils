@@ -89,7 +89,7 @@ describe('Server error handling: ', () => {
     [consoleSpy, sentrySpy].forEach((spy) => {
       expect(spy.calledOnce).to.be.true;
       expect(spy.getCall(0).args[0].message).to.contain(
-        "Cannot read property 'data' of null"
+        "Cannot read properties of null (reading 'data')"
       );
       expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
     });

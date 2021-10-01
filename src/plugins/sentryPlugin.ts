@@ -13,11 +13,11 @@ import { ApolloServerPlugin } from 'apollo-server-plugin-base';
  */
 //Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
 export const sentryPlugin: ApolloServerPlugin = {
-  requestDidStart(_) {
+  async requestDidStart() {
     /* Within this returned object, define functions that respond
                  to request-specific lifecycle events. */
     return {
-      didEncounterErrors(ctx) {
+      async didEncounterErrors(ctx) {
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {

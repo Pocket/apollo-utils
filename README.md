@@ -4,6 +4,7 @@ We use this repository as a place to keep code we use across our apollo implemen
 These include plugins, dataloader functions, etc.
 
 ## Example Usage
+
 #### batchCacheFn
 ```typescript
 import {batchCacheFn} from "./dataloader";
@@ -34,11 +35,11 @@ const server = new ApolloServer({
 });
 ```
 
-- Throwing custom error:
+- Throwing custom error
 ```typescript
  throw new NotFoundError('book id');
 ```
-- Throwing Apollo Errors
+- Throwing Apollo errors
 
 ```typescript
 import { UserInputError } from 'apollo-server-errors';
@@ -50,3 +51,6 @@ throw new UserInputError('Invalid User Input');
 1. `npm install`
 2. `npm run test` run tests or `npm run test:watch` to watch files and run tests when the code changes.
 3. Be sure to export any new modules in `src/index.ts`
+
+## Dependency 
+1. Update the apollo server version to 3 and node version to 16 to import this package.
