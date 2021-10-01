@@ -19,9 +19,11 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@apollo/federation": "^0.21.0",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",
     "@types/chai": "^4.2.15",
+    "@types/deep-equal-in-any-order": "1.0.1",
     "@types/jest": "^26.0.22",
     "@types/md5": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
@@ -34,15 +36,18 @@
     "prettier": "^2.2.1",
     "semantic-release": "^17.4.2",
     "ts-jest": "^26.5.4",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.2.1",
     "typescript": "^4.2.3"
   },
   "dependencies": {
     "@sentry/node": "^6.2.3",
     "apollo-client": "^2.6.10",
-    "apollo-server-cache-redis": "^1.2.3",
-    "apollo-server-caching": "^0.7.0",
-    "md5": "^2.3.0"
+    "apollo-server": "^3.3.0",
+    "apollo-server-cache-redis": "^3.1.0",
+    "apollo-server-caching": "^3.1.0",
+    "deep-equal-in-any-order": "^1.1.13",
+    "md5": "^2.3.0",
+    "sinon": "^11.1.2"
   },
   "publishConfig": {
     "cache": "~/.npm",
