@@ -38,7 +38,7 @@ export const sentryPlugin: ApolloServerPlugin = {
 
             // Log query and variables as extras (make sure to strip out sensitive data!)
             scope.setExtra('query', ctx.request.query);
-            scope.setExtra('variables', ctx.request.variables);
+            scope.setExtra('variables', JSON.stringify(ctx.request.variables));
 
             if (err.path) {
               // We can also add the path as breadcrumb
