@@ -6,3 +6,4 @@ export * from './cache/ElasticacheRedis';
 export * from './plugins/sentryPlugin';
 export * from './dataloader';
 export * from './errorHandler/errorHandler';
+export * from './pagination/';
