@@ -89,7 +89,7 @@ describe('Server error handling: ', () => {
     [consoleSpy, sentrySpy].forEach((spy) => {
       expect(spy.calledOnce).to.be.true;
       expect(spy.getCall(0).args[0].message).to.contain(
-        "Cannot read properties of null (reading 'data')"
+        "Cannot read property 'data' of null"
       );
       expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
     });
@@ -120,6 +120,7 @@ describe('Server error handling: ', () => {
       expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
     });
   });
+
   it('Can handle multiple errors and still resolve data', async () => {
     const query = `
         query {
@@ -192,6 +193,7 @@ describe('Server error handling: ', () => {
     const res = await server.executeOperation({ query });
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Bad input');
+    expect(res.errors[0].extensions.code).to.equal('BAD_USER_INPUT');
     // Check the original error got logged and sent to sentry
     // This is raised during the resolver, so will trigger sending errors
     [consoleSpy, sentrySpy].forEach((spy) => {
