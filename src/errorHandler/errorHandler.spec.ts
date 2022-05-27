@@ -1,6 +1,6 @@
 import { ApolloServer } from 'apollo-server-express';
 import { gql } from 'apollo-server';
-import { buildFederatedSchema } from '@apollo/federation';
+import { buildSubgraphSchema } from '@apollo/subgraph';
 import { sentryPlugin } from '../plugins/sentryPlugin';
 import { errorHandler } from './errorHandler';
 import { UserInputError } from 'apollo-server-errors';
@@ -51,7 +51,7 @@ const resolvers = {
 };
 
 const server = new ApolloServer({
-  schema: buildFederatedSchema({ typeDefs, resolvers }),
+  schema: buildSubgraphSchema({ typeDefs, resolvers }),
   plugins: [sentryPlugin, ApolloServerPluginUsageReportingDisabled()],
   formatError: errorHandler,
   apollo: {
