@@ -1,0 +1,22 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    // Extend our standard config
+    'github>Pocket/renovate-config',
+  ],
+  //Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others
+  packageRules: [
+    {
+      packagePatterns: ['*'],
+      rangeStrategy: 'replace',
+    },
+    {
+      depTypeList: ['devDependencies'],
+      rangeStrategy: 'pin',
+    },
+    {
+      depTypeList: ['peerDependencies'],
+      rangeStrategy: 'widen',
+    },
+  ],
+}
