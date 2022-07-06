@@ -21,17 +21,17 @@
   "devDependencies": {
     "@pocket-tools/eslint-config": "1.1.0",
     "@pocket-tools/tsconfig": "1.0.2",
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.0",
-    "@types/chai": "^4.2.15",
+    "@semantic-release/changelog": "6.0.1",
+    "@semantic-release/git": "10.0.1",
+    "@types/chai": "4.3.1",
     "@types/deep-equal-in-any-order": "1.0.1",
-    "@types/jest": "^27.0.2",
-    "@types/md5": "^2.3.0",
-    "chai": "^4.3.4",
-    "jest": "^26.6.3",
-    "semantic-release": "^19.0.2",
-    "ts-jest": "^26.5.4",
-    "ts-node": "^10.3.0"
+    "@types/jest": "27.5.1",
+    "@types/md5": "2.3.2",
+    "chai": "4.3.6",
+    "jest": "26.6.3",
+    "semantic-release": "19.0.2",
+    "ts-jest": "26.5.6",
+    "ts-node": "10.8.0"
   },
   "dependencies": {
     "@apollo/subgraph": "^2.0.0",
