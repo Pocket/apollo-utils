@@ -25,7 +25,7 @@
     "@semantic-release/git": "10.0.1",
     "@types/chai": "4.3.1",
     "@types/deep-equal-in-any-order": "1.0.1",
-    "@types/jest": "28.1.5",
+    "@types/jest": "28.1.6",
     "@types/md5": "2.3.2",
     "chai": "4.3.6",
     "jest": "28.1.3",
