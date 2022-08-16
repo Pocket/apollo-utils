@@ -39,10 +39,7 @@ export const sentryPlugin: ApolloServerPlugin = {
           // all errors extending ApolloError should be user-facing
           if (
             errorCodes.includes(err.extensions?.code?.toString()) ||
-            //the error-handler is called after sentryPlugin,
-            //so we won't have `code` populated yet
-            //so we are string matching with `NotFoundError` class message prefix
-            err.message.includes(NotFoundError.errorPrefix)
+            err.originalError instanceof NotFoundError
           ) {
             continue;
           }
