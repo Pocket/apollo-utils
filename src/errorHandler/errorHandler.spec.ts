@@ -111,13 +111,9 @@ describe('Server error handling: ', () => {
     // Just passing through, so check if not undefined
     expect(error.path).to.not.be.undefined;
     expect(error.locations).to.not.be.undefined;
-    // Check the original error got logged and sent to sentry
+    //not logging not-found errors
     [consoleSpy, sentrySpy].forEach((spy) => {
-      expect(spy.calledOnce).to.be.true;
-      expect(spy.getCall(0).args[0].message).to.equal(
-        'Error - Not Found: book id'
-      );
-      expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
+      expect(spy.callCount).to.equal(0);
     });
   });
   it('Can handle multiple errors and still resolve data', async () => {
@@ -192,12 +188,9 @@ describe('Server error handling: ', () => {
     const res = await server.executeOperation({ query });
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Bad input');
-    // Check the original error got logged and sent to sentry
-    // This is raised during the resolver, so will trigger sending errors
+    // user error - shouldn't be logged
     [consoleSpy, sentrySpy].forEach((spy) => {
-      expect(spy.calledOnce).to.be.true;
-      expect(spy.getCall(0).args[0].message).to.contain('Bad input');
-      expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
+      expect(spy.callCount).to.equal(0);
     });
   });
 });

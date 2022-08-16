@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/node';
-import { ApolloError } from 'apollo-server-errors';
 import { ApolloServerPlugin } from 'apollo-server-plugin-base';
 
 /**
@@ -18,6 +17,16 @@ export const sentryPlugin: ApolloServerPlugin = {
                  to request-specific lifecycle events. */
     return {
       async didEncounterErrors(ctx) {
+        //for error codes:
+        // https://www.apollographql.com/docs/apollo-server/data/errors/#bad_user_input
+        const errorCodes = [
+          'FORBIDDEN',
+          'UNAUTHENTICATED',
+          'BAD_USER_INPUT',
+          'GRAPHQL_PARSE_FAILED',
+          'GRAPHQL_VALIDATION_FAILED',
+        ];
+
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {
@@ -27,7 +36,13 @@ export const sentryPlugin: ApolloServerPlugin = {
         for (const err of ctx.errors) {
           // Only report internal server errors,
           // all errors extending ApolloError should be user-facing
-          if (err instanceof ApolloError) {
+          if (
+            errorCodes.includes(err.extensions?.code?.toString()) ||
+            //the error-handler is called after sentryPlugin,
+            //so we won't have `code` populated yet
+            //so we are string matching with `NotFoundError` class message prefix
+            err.message.includes('Error - Not Found')
+          ) {
             continue;
           }
 
