@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/node';
 import { ApolloServerPlugin } from 'apollo-server-plugin-base';
+import { NotFoundError } from '../errorHandler/errorHandler';
 
 /**
  * Plugin for handling errors.
@@ -41,7 +42,7 @@ export const sentryPlugin: ApolloServerPlugin = {
             //the error-handler is called after sentryPlugin,
             //so we won't have `code` populated yet
             //so we are string matching with `NotFoundError` class message prefix
-            err.message.includes('Error - Not Found')
+            err.message.includes(NotFoundError.errorPrefix)
           ) {
             continue;
           }

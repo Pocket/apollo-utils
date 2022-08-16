@@ -24,8 +24,9 @@ export function errorHandler(error: GraphQLError): GraphQLError {
 }
 
 export class NotFoundError extends Error {
+  static errorPrefix: string = `Error - Not Found`;
   constructor(message?: string) {
-    super(`Error - Not Found: ${message}`); // 'Error' breaks prototype chain here
+    super(`${NotFoundError.errorPrefix}: ${message}`); // 'Error' breaks prototype chain here
     Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
   }
 }
