@@ -1,5 +1,3 @@
-import { ApolloServerErrorCode } from '@apollo/server/errors';
-import { GraphQLError } from 'graphql';
 import { UserInputError } from '../errorHandler/errorHandler';
 import { PaginationInput } from './types';
 
@@ -21,14 +19,6 @@ export function validatePagination(
     throw new UserInputError(
       'Please set either {after and first} or {before and last}'
     );
-    throw new GraphQLError(
-      'Please set either {after and first} or {before and last}',
-      {
-        extensions: {
-          code: ApolloServerErrorCode.BAD_USER_INPUT,
-        },
-      }
-    );
   }
 
   if (pagination.before) {
@@ -36,11 +26,7 @@ export function validatePagination(
       Buffer.from(pagination.before, 'base64').toString()
     );
     if (before < 0) {
-      throw new GraphQLError('Invalid before cursor', {
-        extensions: {
-          code: ApolloServerErrorCode.BAD_USER_INPUT,
-        },
-      });
+      throw new UserInputError('Invalid before cursor');
     }
 
     if (!pagination.last) {
@@ -51,11 +37,7 @@ export function validatePagination(
   if (pagination.after) {
     const after = parseInt(Buffer.from(pagination.after, 'base64').toString());
     if (after < 0) {
-      throw new GraphQLError('Invalid after cursor', {
-        extensions: {
-          code: ApolloServerErrorCode.BAD_USER_INPUT,
-        },
-      });
+      throw new UserInputError('Invalid after cursor');
     }
 
     if (!pagination.first) {
