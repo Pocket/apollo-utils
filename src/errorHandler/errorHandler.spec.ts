@@ -1,16 +1,17 @@
-import { ApolloServer } from 'apollo-server-express';
-import { gql } from 'apollo-server';
+import { ApolloServer } from '@apollo/server';
+import { gql } from 'graphql-tag';
 import { buildSubgraphSchema } from '@apollo/subgraph';
+import assert from 'assert';
 import { sentryPlugin } from '../plugins/sentryPlugin';
 import { errorHandler } from './errorHandler';
-import { UserInputError } from 'apollo-server-errors';
 import chai, { expect } from 'chai';
 import { NotFoundError } from './errorHandler';
 import sinon from 'sinon';
 import * as Sentry from '@sentry/node';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
 
-import { ApolloServerPluginUsageReportingDisabled } from 'apollo-server-core';
+import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
+import { GraphQLError } from 'graphql';
 
 chai.use(deepEqualInAnyOrder);
 
@@ -24,8 +25,12 @@ function notFound() {
   throw new NotFoundError('book id');
 }
 
-function badUserInput() {
-  throw new UserInputError('Bad input');
+function graphQLError() {
+  throw new GraphQLError('graphql error', {
+    extensions: {
+      code: 'GRAPHQL_VALIDATION_FAILED',
+    },
+  });
 }
 
 const typeDefs = gql(`
@@ -46,7 +51,7 @@ const resolvers = {
     books: badSql,
     lostBook: notFound,
     foundBook: () => ({ title: 'Slaughterhouse 5', author: 'Kurt Vonnegut' }),
-    badBook: badUserInput,
+    badBook: graphQLError,
   },
 };
 
@@ -77,11 +82,14 @@ describe('Server error handling: ', () => {
             }
         }
     `;
-    const res = await server.executeOperation({ query });
-    expect(res.errors.length).to.equal(1);
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    assert(res.errors !== undefined);
+    expect(res?.errors.length).to.equal(1);
     const error = res.errors[0];
     expect(error.message).to.equal('Internal server error');
-    expect(error.extensions.code).to.equal('INTERNAL_SERVER_ERROR');
+    expect(error.extensions?.code).to.equal('INTERNAL_SERVER_ERROR');
     // Just passing through, so check if not undefined
     expect(error.path).to.not.be.undefined;
     expect(error.locations).to.not.be.undefined;
@@ -95,7 +103,7 @@ describe('Server error handling: ', () => {
     });
   });
 
-  it('throws a not found error', async () => {
+  it('CustomGraphQLError implementations are returned as is', async () => {
     const query = `
         query {
             lostBook {
@@ -103,11 +111,14 @@ describe('Server error handling: ', () => {
             }
         }
     `;
-    const res = await server.executeOperation({ query });
-    expect(res.errors.length).to.equal(1);
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    expect(res?.errors?.length).to.equal(1);
+    assert(res.errors !== undefined);
     const error = res.errors[0];
     expect(error.message).to.equal('Error - Not Found: book id');
-    expect(error.extensions.code).to.equal('NOT_FOUND');
+    expect(error.extensions?.code).to.equal('NOT_FOUND');
     // Just passing through, so check if not undefined
     expect(error.path).to.not.be.undefined;
     expect(error.locations).to.not.be.undefined;
@@ -133,7 +144,10 @@ describe('Server error handling: ', () => {
             }
         }
     `;
-    const res = await server.executeOperation({ query });
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    assert(res.errors !== undefined);
     expect(res.errors.length).to.equal(2);
     const messages = res.errors.map((error) => error.message);
     expect(messages).to.deep.equalInAnyOrder([
@@ -155,7 +169,10 @@ describe('Server error handling: ', () => {
             }
         }
     `;
-    const res = await server.executeOperation({ query });
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    assert(res.errors !== undefined);
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Cannot query field');
     [consoleSpy, sentrySpy].forEach((spy) => {
@@ -169,15 +186,18 @@ describe('Server error handling: ', () => {
         }
       }
     `;
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    assert(res.errors !== undefined);
 
-    const res = await server.executeOperation({ query });
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Syntax Error');
     [consoleSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
     });
   });
-  it('does not mask errors from apollo-server-errors raised by application', async () => {
+  it('does not mask GraphQLErrors with a defined extension', async () => {
     const query = `
     query {
       badBook {
@@ -185,9 +205,12 @@ describe('Server error handling: ', () => {
       }
     }
   `;
-    const res = await server.executeOperation({ query });
+    const { body } = await server.executeOperation({ query });
+    assert(body.kind === 'single');
+    const res = body.singleResult;
+    assert(res.errors !== undefined);
     expect(res.errors.length).to.equal(1);
-    expect(res.errors[0].message).to.contain('Bad input');
+    expect(res.errors[0].message).to.contain('graphql error');
     // user error - shouldn't be logged
     [consoleSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
