@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { gql } from 'graphql-tag';
 import { buildSubgraphSchema } from '@apollo/subgraph';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
 import assert from 'assert';
 import { sentryPlugin } from '../plugins/sentryPlugin';
 import { errorHandler } from './errorHandler';
@@ -28,7 +29,7 @@ function notFound() {
 function graphQLError() {
   throw new GraphQLError('graphql error', {
     extensions: {
-      code: 'GRAPHQL_VALIDATION_FAILED',
+      code: ApolloServerErrorCode.GRAPHQL_VALIDATION_FAILED,
     },
   });
 }

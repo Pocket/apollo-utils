@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { ApolloServerPlugin } from '@apollo/server';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
-import { InternalErrorCode, NotFoundError } from '../errorHandler/errorHandler';
+import { InternalErrorCode } from '../errorHandler/errorHandler';
 
 /**
  * This is a list of error codes to not report in the sentry
@@ -50,10 +50,7 @@ export const sentryPlugin: ApolloServerPlugin = {
         for (const err of ctx.errors) {
           // Only report internal server errors,
           // all errors extending ApolloError should be user-facing
-          if (
-            NO_REPORT_ERRORS.has(err.extensions?.code?.toString()) ||
-            err.originalError instanceof NotFoundError
-          ) {
+          if (NO_REPORT_ERRORS.has(err.extensions?.code?.toString())) {
             continue;
           }
 

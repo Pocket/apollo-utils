@@ -38,6 +38,9 @@ export function errorHandler(
       originalError: error as Error,
       // preserve path and locations
       path: (error as GraphQLError)?.path,
+      // The locations parameter cannot be specified from locations
+      // (type mismatch), but will be built from positions and source
+      // if provided. This is being explicitly tested for breaks.
       positions: (error as GraphQLError)?.positions,
       source: (error as GraphQLError)?.source,
     }).toJSON();
@@ -49,7 +52,15 @@ export function errorHandler(
  * custom internal errors. Otherwise, all implementation is just relying
  * on GraphQLError
  *
- * This really shouldn't be used directly.
+ * This really shouldn't be used directly, but is exported so that other
+ * packages or consumers can extend this same interface (though they really
+ * should implement here to prevent duplicate implementations!). Still, exported
+ * because there could be a subgraph that we never intend to federate or
+ * similar use cases in the future.
+ *
+ * To extend this, create a unique error code for your new error, and add
+ * it to the InternalErrorCode enum above, add the error code to NO_REPORT_ERRORS
+ * in `sentryPlugin.ts`, and implement an error extension class below.
  */
 export class CustomGraphQLError extends GraphQLError implements Error {
   constructor(message: string, options?: GraphQLErrorOptions) {
