@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server-errors';
+import { UserInputError } from '../errorHandler/errorHandler';
 import { PaginationInput } from './types';
 
 export function validatePagination(

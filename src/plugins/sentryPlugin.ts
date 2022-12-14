@@ -1,6 +1,29 @@
 import * as Sentry from '@sentry/node';
-import { ApolloServerPlugin } from 'apollo-server-plugin-base';
-import { NotFoundError } from '../errorHandler/errorHandler';
+import { ApolloServerPlugin } from '@apollo/server';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
+import { InternalErrorCode } from '../errorHandler/errorHandler';
+
+/**
+ * This is a list of error codes to not report in the sentry
+ * plugin.
+ */
+const NO_REPORT_ERRORS = new Set<string>([
+  // `InternalErrorCode`s to not report
+  InternalErrorCode.BAD_USER_INPUT,
+  InternalErrorCode.FORBIDDEN,
+  InternalErrorCode.NOT_FOUND,
+  InternalErrorCode.UNAUTHENTICATED,
+  // `ApolloServerErrorCode`s to not report
+  // some of these are duplicates, set will resolve and ensure these
+  // are still ignored if they accidentally change upstream.
+  ApolloServerErrorCode.BAD_REQUEST,
+  ApolloServerErrorCode.BAD_USER_INPUT,
+  ApolloServerErrorCode.GRAPHQL_PARSE_FAILED,
+  ApolloServerErrorCode.GRAPHQL_VALIDATION_FAILED,
+  ApolloServerErrorCode.OPERATION_RESOLUTION_FAILURE,
+  ApolloServerErrorCode.PERSISTED_QUERY_NOT_FOUND,
+  ApolloServerErrorCode.PERSISTED_QUERY_NOT_SUPPORTED,
+]);
 
 /**
  * Plugin for handling errors.
@@ -18,16 +41,6 @@ export const sentryPlugin: ApolloServerPlugin = {
                  to request-specific lifecycle events. */
     return {
       async didEncounterErrors(ctx) {
-        //for error codes:
-        // https://www.apollographql.com/docs/apollo-server/data/errors/#bad_user_input
-        const errorCodes = [
-          'FORBIDDEN',
-          'UNAUTHENTICATED',
-          'BAD_USER_INPUT',
-          'GRAPHQL_PARSE_FAILED',
-          'GRAPHQL_VALIDATION_FAILED',
-        ];
-
         // If we couldn't parse the operation, don't
         // do anything here
         if (!ctx.operation) {
@@ -37,10 +50,7 @@ export const sentryPlugin: ApolloServerPlugin = {
         for (const err of ctx.errors) {
           // Only report internal server errors,
           // all errors extending ApolloError should be user-facing
-          if (
-            errorCodes.includes(err.extensions?.code?.toString()) ||
-            err.originalError instanceof NotFoundError
-          ) {
+          if (NO_REPORT_ERRORS.has(err.extensions?.code?.toString())) {
             continue;
           }
 
