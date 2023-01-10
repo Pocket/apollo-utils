@@ -134,6 +134,12 @@ export const reorderData = <T, U>(
 /**
  * Batch function with caching
  * @param props
+ *
+ * This is not going away immediately, but really should not be used anymore
+ * outside `parser-graphql-wrapper`. If we run into performance issues, enabling
+ * autopipelining in ioredis is recommended instead:
+ * https://github.com/luin/ioredis#autopipelining
+ * @deprecated
  */
 export const batchCacheFn = async <valueType, returnType>(
   props: BatchFnProps<valueType, returnType>
