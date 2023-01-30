@@ -1,16 +1,15 @@
+import {
+  KeyValueCache,
+  KeyValueCacheSetOptions,
+} from '@apollo/utils.keyvaluecache';
+
 export interface MsetKeyValues {
   [key: string]: string;
 }
 
-export interface KeyValueCacheSetOptions {
-  /**
-   * Specified in **seconds**, the time-to-live (TTL) value limits the lifespan
-   * of the data being stored in the cache.
-   */
-  ttl?: number | null;
-}
+export { KeyValueCacheSetOptions };
 
-export interface CacheInterface {
+export interface CacheInterface extends KeyValueCache {
   /**
    * Generates a cache key from key input
    * @param key
