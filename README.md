@@ -15,34 +15,11 @@ These include plugins, dataloader functions, etc.
 
 ## Example Usage
 
-#### batchCacheFn
-
-```typescript
-import { batchCacheFn } from './dataloader';
-
-const batchGetUsers = async (userInputs: UserInput[]): Promise<User[]> => {
-  return batchCacheFn<UserParam, User>({
-    values: userInputs,
-    valueKeyFn: (userInput: UserInput) => userInput.id, // same return value as cacheKeyFn
-    callback: (userInputs: UserInput[]) => batchFetchUsersFromDb(userInputs),
-    cache: new ElasticacheRedis(
-      new RedisCache({ host, port }),
-      new RedisCache({ host, port })
-    ), // primary and reader
-    cacheKeyPrefix: 'user-', // optional
-    returnTypeKeyFn: (user: User) => user.id, // same return value as valueFn
-    maxAge: 300,
-  });
-};
-```
-
 #### Sentry Plugin and Error Handler
 
 - Setting up plugin and error handler with the apollo server
 
 ```typescript
-import { batchCacheFn } from './dataloader';
-
 const server = new ApolloServer({
   schema: buildFederatedSchema({ typeDefs, resolvers }),
   plugins: [sentryPlugin],
