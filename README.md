@@ -83,10 +83,14 @@ export type Something = {
 In your resolvers file(s):
 
 ```typescript
-import { isoStringScalar } from '@pocket-tools/apollo-utils';
+import { PocketDefaultScalars } from '@pocket-tools/apollo-utils';
 
 const resolvers = {
-  ISOString: isoStringScalar,
+  ...PocketDefaultScalars,
+  // ...other resolvers...
+  // if another server needs a different internal representation
+  // they can still override the defaults below:
+  // ISOString: someNonDefaultScalar
 };
 ```
 
