@@ -80,7 +80,7 @@ export type Something = {
   deletedAt: Date | null;
 ```
 
-In your resolvesr file(s):
+In your resolvers file(s):
 
 ```typescript
 import { isoStringScalar } from '@pocket-tools/apollo-utils';
