@@ -47,7 +47,7 @@ This gives you a ISOString Scalar that expects a valid TypeScript Date object or
 
 The expectation of this custom scalar is that the database client layer will handle mapping valid Dates to a Typescript Date Object and invalid Dates to either null (e.g. should be considered a None type) or throw some internal error.
 
-This custom scalar expects ISO-compliant datetime string values as input, using the more flexible date-fns package to handle MySQL-style ISO-8601 datetime strings.
+This custom scalar expects UTC, ISO-8601-compliant datetime string values as input only. Inputs must specify UTC and must follow ISO-8601.
 
 In your graphql schema file:
 
