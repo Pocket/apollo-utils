@@ -1,5 +1,5 @@
 import { GraphQLScalarType, Kind } from 'graphql';
-import { isValid, parseISO, toDate } from 'date-fns';
+import { DateTime } from 'luxon';
 import {
   InternalServerError,
   UserInputError,
@@ -58,15 +58,21 @@ export const isoStringScalar = new GraphQLScalarType({
       );
     }
 
-    const datetime = parseISO(value);
+    const isoDateTime = DateTime.fromISO(value);
+    if (!isoDateTime.isValid) {
+      // if not ISO, try SQL Date Form, forced to UTC
+      const sqlDateTime = DateTime.fromSQL(value, { zone: 'UTC' });
+      // if also not SQL, throw error
+      if (!sqlDateTime.isValid) {
+        throw new UserInputError(
+          'Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
+        );
+      }
 
-    if (!isValid(datetime)) {
-      throw new UserInputError(
-        'Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
-      );
+      return sqlDateTime.toJSDate();
     }
 
-    return toDate(datetime);
+    return isoDateTime.toJSDate();
   },
 
   /**

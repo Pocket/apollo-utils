@@ -1,16 +1,14 @@
 import { Kind } from 'graphql';
 import { isoStringScalar } from './isoStringScalar';
 
-// add a simple graphql server test using this scalar in sample schema
-
 const fullESTDateStr = '2023-02-11T13:39:48.000-05:00';
-const fullESTDateObj = new Date(fullESTDateStr);
+const fullESTDateObj = new Date('2023-02-11T18:39:48.000Z'); // confirm other timezones are forced to UTC
 const fullUTCDateStr = '2023-02-11T18:39:48.000Z';
-const fullUTCDateObj = new Date(fullUTCDateStr);
+const fullUTCDateObj = new Date('2023-02-11T18:39:48.000Z');
 const mysqlBadDateStr = '0000-00-00 00:00:00';
 const mysqlBadDateObj = new Date(mysqlBadDateStr);
 const mysqlGoodDateStr = '2008-10-21 13:57:01';
-const mysqlGoodDateObj = new Date(mysqlGoodDateStr);
+const mysqlGoodDateObj = new Date('2008-10-21T13:57:01.000Z'); // confirm SQL strings are forced to UTC
 const otherBadDateStr = '10/21/2008';
 
 describe('isoStringScalar', () => {
@@ -21,7 +19,7 @@ describe('isoStringScalar', () => {
     });
     it('valid MySql client UTC-implicit TS Date object in, UTC ISOString out', async () => {
       const result = isoStringScalar.serialize(mysqlGoodDateObj);
-      expect(result).toBe('2008-10-21T17:57:01.000Z');
+      expect(result).toBe('2008-10-21T13:57:01.000Z');
     });
     it('null in, null out', async () => {
       const result = isoStringScalar.serialize(null);

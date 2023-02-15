@@ -1,14 +1,14 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
-import { gql } from 'graphql-tag';
 import { buildSubgraphSchema } from '@apollo/subgraph';
-import { isoStringScalar } from './isoStringScalar';
+import { gql } from 'graphql-tag';
 import { errorHandler } from '../errorHandler/errorHandler';
+import { isoStringScalar } from './isoStringScalar';
 
 const mysqlBadDateStr = '0000-00-00 00:00:00';
 const mysqlBadDateObj = new Date(mysqlBadDateStr);
 const mysqlGoodDateStr = '2008-10-21 13:57:01';
-const mysqlGoodDateObj = new Date(mysqlGoodDateStr);
+const mysqlGoodDateObj = new Date('2008-10-21T13:57:01.000Z'); // confirm SQL strings are forced to UTC
 
 const fakeData = [
   {
@@ -112,9 +112,7 @@ describe('isoStringScalar ApolloServer usage', () => {
         variables: { id: '1' },
       });
       const result = response.body['singleResult'];
-      expect(result.data.something.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
-      );
+      expect(result.data.something.createdAt).toBe('2008-10-21T13:57:01.000Z');
       expect(result.data.something.deletedAt).toBe(null);
     });
     it('valid date & date responses', async () => {
@@ -123,12 +121,8 @@ describe('isoStringScalar ApolloServer usage', () => {
         variables: { id: '2' },
       });
       const result = response.body['singleResult'];
-      expect(result.data.something.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
-      );
-      expect(result.data.something.deletedAt).toBe(
-        mysqlGoodDateObj.toISOString()
-      );
+      expect(result.data.something.createdAt).toBe('2008-10-21T13:57:01.000Z');
+      expect(result.data.something.deletedAt).toBe('2008-10-21T13:57:01.000Z');
     });
     it('invalid date & non-date responses', async () => {
       const response = await server.executeOperation({
@@ -152,14 +146,14 @@ describe('isoStringScalar ApolloServer usage', () => {
     it('valid ISO date in, valid response out', async () => {
       const response = await server.executeOperation({
         query: GET_SOMETHING_BY_DATE_VAR,
-        variables: { date: mysqlGoodDateObj.toISOString() },
+        variables: { date: '2008-10-21T13:57:01.000Z' },
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
@@ -171,10 +165,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
@@ -187,7 +181,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(null);
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('1');
       expect(result.errors).toBeUndefined;
@@ -222,7 +216,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       const response = await server.executeOperation({
         query: gql`
           query GetSomethingDeleted {
-            somethingDeleted(date: "2008-10-21T17:57:01.000Z") {
+            somethingDeleted(date: "2008-10-21T13:57:01.000Z") {
               id
               createdAt
               deletedAt
@@ -232,10 +226,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
@@ -244,7 +238,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       const response = await server.executeOperation({
         query: gql`
           query GetSomethingDeleted {
-            somethingDeleted(date: "2008-10-21 13:57:01") {
+            somethingDeleted(date: "2008-10-21 13:57:01Z") {
               id
               createdAt
               deletedAt
@@ -255,10 +249,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
@@ -279,7 +273,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(null);
       expect(result.data.somethingDeleted.createdAt).toBe(
-        mysqlGoodDateObj.toISOString()
+        '2008-10-21T13:57:01.000Z'
       );
       expect(result.data.somethingDeleted.id).toBe('1');
       expect(result.errors).toBeUndefined;
