@@ -5,26 +5,28 @@ import { gql } from 'graphql-tag';
 import { errorHandler } from '../errorHandler/errorHandler';
 import { isoStringScalar } from './isoStringScalar';
 
-const mysqlBadDateStr = '0000-00-00 00:00:00';
-const mysqlBadDateObj = new Date(mysqlBadDateStr);
-const mysqlGoodDateStr = '2008-10-21 13:57:01';
-const mysqlGoodDateObj = new Date('2008-10-21T13:57:01.000Z'); // confirm SQL strings are forced to UTC
+const isoUTCDateStr = '2023-02-11T18:39:48.000Z';
+const isoUTCDateObj = new Date(isoUTCDateStr);
+const mysqlDateStr = '2008-10-21 13:57:01';
+const mysqlNullDateStr = '0000-00-00 00:00:00';
+const mysqlNullDateObj = new Date(mysqlNullDateStr);
+const otherDateStr = '10/21/2008';
 
 const fakeData = [
   {
     id: '1',
-    createdAt: mysqlGoodDateObj,
+    createdAt: isoUTCDateObj,
     deletedAt: null, // '0000-00-00 00:00:00' from database translated to null
   },
   {
     id: '2',
-    createdAt: mysqlGoodDateObj,
-    deletedAt: mysqlGoodDateObj,
+    createdAt: isoUTCDateObj,
+    deletedAt: isoUTCDateObj,
   },
   {
     id: '3',
-    createdAt: mysqlGoodDateObj,
-    deletedAt: mysqlBadDateObj,
+    createdAt: isoUTCDateObj,
+    deletedAt: mysqlNullDateObj,
   },
 ];
 
@@ -112,7 +114,7 @@ describe('isoStringScalar ApolloServer usage', () => {
         variables: { id: '1' },
       });
       const result = response.body['singleResult'];
-      expect(result.data.something.createdAt).toBe('2008-10-21T13:57:01.000Z');
+      expect(result.data.something.createdAt).toBe(isoUTCDateStr);
       expect(result.data.something.deletedAt).toBe(null);
     });
     it('valid date & date responses', async () => {
@@ -121,8 +123,8 @@ describe('isoStringScalar ApolloServer usage', () => {
         variables: { id: '2' },
       });
       const result = response.body['singleResult'];
-      expect(result.data.something.createdAt).toBe('2008-10-21T13:57:01.000Z');
-      expect(result.data.something.deletedAt).toBe('2008-10-21T13:57:01.000Z');
+      expect(result.data.something.createdAt).toBe(isoUTCDateStr);
+      expect(result.data.something.deletedAt).toBe(isoUTCDateStr);
     });
     it('invalid date & non-date responses', async () => {
       const response = await server.executeOperation({
@@ -146,30 +148,11 @@ describe('isoStringScalar ApolloServer usage', () => {
     it('valid ISO date in, valid response out', async () => {
       const response = await server.executeOperation({
         query: GET_SOMETHING_BY_DATE_VAR,
-        variables: { date: '2008-10-21T13:57:01.000Z' },
+        variables: { date: isoUTCDateStr },
       });
       const result = response.body['singleResult'];
-      expect(result.data.somethingDeleted.deletedAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.id).toBe('2');
-      expect(result.errors).toBeUndefined;
-    });
-    it('valid MySQL date in, valid response out', async () => {
-      const response = await server.executeOperation({
-        query: GET_SOMETHING_BY_DATE_VAR,
-        variables: { date: mysqlGoodDateStr },
-      });
-      const result = response.body['singleResult'];
-      expect(result.data.somethingDeleted.deletedAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
+      expect(result.data.somethingDeleted.deletedAt).toBe(isoUTCDateStr);
+      expect(result.data.somethingDeleted.createdAt).toBe(isoUTCDateStr);
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
     });
@@ -180,11 +163,33 @@ describe('isoStringScalar ApolloServer usage', () => {
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(null);
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
+      expect(result.data.somethingDeleted.createdAt).toBe(isoUTCDateStr);
       expect(result.data.somethingDeleted.id).toBe('1');
       expect(result.errors).toBeUndefined;
+    });
+    it('invalid date format in, error out', async () => {
+      const response = await server.executeOperation({
+        query: GET_SOMETHING_BY_DATE_VAR,
+        variables: { date: otherDateStr },
+      });
+      const result = response.body['singleResult'];
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
+      expect(result.errors[0].message).toBe(
+        'Variable "$date" got invalid value "10/21/2008"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+      );
+    });
+    it('invalid MySQL date in, error out', async () => {
+      const response = await server.executeOperation({
+        query: GET_SOMETHING_BY_DATE_VAR,
+        variables: { date: mysqlDateStr },
+      });
+      const result = response.body['singleResult'];
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
+      expect(result.errors[0].message).toBe(
+        'Variable "$date" got invalid value "2008-10-21 13:57:01"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+      );
     });
     it('invalid type in, error out', async () => {
       const response = await server.executeOperation({
@@ -198,25 +203,13 @@ describe('isoStringScalar ApolloServer usage', () => {
         'Variable "$date" got invalid value 2023; Invalid User Input: ISOString Scalar parse expected a value of type string or null'
       );
     });
-    it('invalid date format in, error out', async () => {
-      const response = await server.executeOperation({
-        query: GET_SOMETHING_BY_DATE_VAR,
-        variables: { date: '1/1/23' },
-      });
-      const result = response.body['singleResult'];
-      expect(result.errors.length).toBe(1);
-      expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
-      expect(result.errors[0].message).toBe(
-        'Variable "$date" got invalid value "1/1/23"; Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
-      );
-    });
   });
   describe('parseLiteral', () => {
     it('valid ISO date in, valid response out', async () => {
       const response = await server.executeOperation({
         query: gql`
           query GetSomethingDeleted {
-            somethingDeleted(date: "2008-10-21T13:57:01.000Z") {
+            somethingDeleted(date: "2023-02-11T18:39:48.000Z") {
               id
               createdAt
               deletedAt
@@ -225,35 +218,8 @@ describe('isoStringScalar ApolloServer usage', () => {
         `,
       });
       const result = response.body['singleResult'];
-      expect(result.data.somethingDeleted.deletedAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.id).toBe('2');
-      expect(result.errors).toBeUndefined;
-    });
-    it('valid MySQL date in, valid response out', async () => {
-      const response = await server.executeOperation({
-        query: gql`
-          query GetSomethingDeleted {
-            somethingDeleted(date: "2008-10-21 13:57:01Z") {
-              id
-              createdAt
-              deletedAt
-            }
-          }
-        `,
-        variables: { date: mysqlGoodDateStr },
-      });
-      const result = response.body['singleResult'];
-      expect(result.data.somethingDeleted.deletedAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
+      expect(result.data.somethingDeleted.deletedAt).toBe(isoUTCDateStr);
+      expect(result.data.somethingDeleted.createdAt).toBe(isoUTCDateStr);
       expect(result.data.somethingDeleted.id).toBe('2');
       expect(result.errors).toBeUndefined;
     });
@@ -268,37 +234,12 @@ describe('isoStringScalar ApolloServer usage', () => {
             }
           }
         `,
-        variables: { date: null },
       });
       const result = response.body['singleResult'];
       expect(result.data.somethingDeleted.deletedAt).toBe(null);
-      expect(result.data.somethingDeleted.createdAt).toBe(
-        '2008-10-21T13:57:01.000Z'
-      );
+      expect(result.data.somethingDeleted.createdAt).toBe(isoUTCDateStr);
       expect(result.data.somethingDeleted.id).toBe('1');
       expect(result.errors).toBeUndefined;
-    });
-    it('invalid type in, error out', async () => {
-      const response = await server.executeOperation({
-        query: gql`
-          query GetSomethingDeleted {
-            somethingDeleted(date: 2022) {
-              id
-              createdAt
-              deletedAt
-            }
-          }
-        `,
-        variables: { date: 2023 },
-      });
-      const result = response.body['singleResult'];
-      expect(result.errors.length).toBe(1);
-      expect(result.errors[0].extensions.code).toBe(
-        'GRAPHQL_VALIDATION_FAILED'
-      );
-      expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
-      );
     });
     it('invalid date format in, error out', async () => {
       const response = await server.executeOperation({
@@ -311,7 +252,6 @@ describe('isoStringScalar ApolloServer usage', () => {
             }
           }
         `,
-        variables: { date: '1/1/23' },
       });
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
@@ -319,7 +259,49 @@ describe('isoStringScalar ApolloServer usage', () => {
         'GRAPHQL_VALIDATION_FAILED'
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+      );
+    });
+    it('invalid MySQL date in, error out', async () => {
+      const response = await server.executeOperation({
+        query: gql`
+          query GetSomethingDeleted {
+            somethingDeleted(date: "2/2/2023") {
+              id
+              createdAt
+              deletedAt
+            }
+          }
+        `,
+      });
+      const result = response.body['singleResult'];
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].extensions.code).toBe(
+        'GRAPHQL_VALIDATION_FAILED'
+      );
+      expect(result.errors[0].message).toBe(
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+      );
+    });
+    it('invalid type in, error out', async () => {
+      const response = await server.executeOperation({
+        query: gql`
+          query GetSomethingDeleted {
+            somethingDeleted(date: 2022) {
+              id
+              createdAt
+              deletedAt
+            }
+          }
+        `,
+      });
+      const result = response.body['singleResult'];
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].extensions.code).toBe(
+        'GRAPHQL_VALIDATION_FAILED'
+      );
+      expect(result.errors[0].message).toBe(
+        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
       );
     });
     it('invalid 0000-00-00 date format in, error out', async () => {
@@ -333,7 +315,6 @@ describe('isoStringScalar ApolloServer usage', () => {
             }
           }
         `,
-        variables: { date: mysqlBadDateStr },
       });
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
@@ -341,7 +322,7 @@ describe('isoStringScalar ApolloServer usage', () => {
         'GRAPHQL_VALIDATION_FAILED'
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
       );
     });
   });

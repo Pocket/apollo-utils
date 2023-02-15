@@ -27,7 +27,7 @@ export const isoStringScalar = new GraphQLScalarType({
       );
     }
 
-    // isNaN here checks for 0000-00-00 style dates, which are invalid
+    // isNaN here checks for 0000-00-00-styled dates, which are invalid, & other invalid
     if (isNaN(value.valueOf())) {
       throw new InternalServerError(
         'Invalid Data Store Response: invalid Date object'
@@ -58,18 +58,11 @@ export const isoStringScalar = new GraphQLScalarType({
       );
     }
 
-    const isoDateTime = DateTime.fromISO(value);
-    if (!isoDateTime.isValid) {
-      // if not ISO, try SQL Date Form, forced to UTC
-      const sqlDateTime = DateTime.fromSQL(value, { zone: 'UTC' });
-      // if also not SQL, throw error
-      if (!sqlDateTime.isValid) {
-        throw new UserInputError(
-          'Invalid User Input: ISOString Scalar parse expected a ISO-8601-compliant string'
-        );
-      }
-
-      return sqlDateTime.toJSDate();
+    const isoDateTime = DateTime.fromISO(value, { setZone: true });
+    if (!(isoDateTime.offset === 0) || !isoDateTime.isValid) {
+      throw new UserInputError(
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+      );
     }
 
     return isoDateTime.toJSDate();
