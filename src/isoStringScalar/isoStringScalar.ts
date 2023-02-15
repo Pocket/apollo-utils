@@ -1,5 +1,5 @@
 import { GraphQLScalarType, Kind } from 'graphql';
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
 import {
   InternalServerError,
   UserInputError,
@@ -58,6 +58,9 @@ export const isoStringScalar = new GraphQLScalarType({
       );
     }
 
+    // We only want explicitly UTC dates passed in. So we override the default (system) TZ to be US Central
+    // to force an error on any dates not explicit set to a timezone (which still works if the system is set to UTC).
+    Settings.defaultZone = 'America/Chicago';
     const isoDateTime = DateTime.fromISO(value, { setZone: true });
     if (!(isoDateTime.offset === 0) || !isoDateTime.isValid) {
       throw new UserInputError(
