@@ -90,4 +90,4 @@ const resolvers = {
 };
 ```
 
-& make sure the servier typeDefs points back to the schema.graphql file already update (in order to know about the ISOString type).
+& make sure the server typeDefs points back to the schema.graphql file already update (in order to know about the ISOString type).
