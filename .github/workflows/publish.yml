@@ -20,7 +20,7 @@ jobs:
           scope: '@pocket-tools'
       - run: npm ci
       - run: npm run build
-      - run: npm run test
+      - run: npm run test -- --forceExit
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v3.2.0
         env:
