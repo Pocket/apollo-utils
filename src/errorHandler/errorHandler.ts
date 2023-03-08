@@ -3,7 +3,10 @@ import {
   GraphQLFormattedError,
   GraphQLErrorOptions,
 } from 'graphql';
-import { unwrapResolverError } from '@apollo/server/errors';
+import {
+  unwrapResolverError,
+  ApolloServerErrorCode,
+} from '@apollo/server/errors';
 
 /**
  * Internally managed error codes.  If a new error is added here,
@@ -18,6 +21,18 @@ export enum InternalErrorCode {
   UNAUTHENTICATED = 'UNAUTHENTICATED',
 }
 
+const isGatewayError = (value: unknown): value is GraphQLError =>
+  !!value &&
+  typeof value == 'object' &&
+  'extensions' in value &&
+  typeof (value as GraphQLError).extensions === 'object' &&
+  'code' in (value as GraphQLError).extensions &&
+  typeof (value as GraphQLError).extensions.code === 'string';
+const pocketErrorCodes = Object.values(InternalErrorCode);
+const apolloErrorCodes = Object.values(ApolloServerErrorCode);
+const gatewayUnmaskedErrors: string[] = [
+  ...new Set([...pocketErrorCodes, ...apolloErrorCodes]),
+];
 /**
  * Used for formatting errors returned to the client. Hide any
  * errors that might reveal server details. Handle special cases
@@ -31,6 +46,11 @@ export function errorHandler(
   if (unwrapResolverError(error) instanceof GraphQLError) {
     // Keep GraphQL errors intact
     // e.g. failed parsing, bad input
+    return formattedError;
+  } else if (
+    isGatewayError(error) &&
+    gatewayUnmaskedErrors.indexOf(error.extensions.code as string) > -1
+  ) {
     return formattedError;
   } else {
     // Mask other kinds of errors
