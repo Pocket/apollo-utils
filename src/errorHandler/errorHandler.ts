@@ -30,9 +30,11 @@ const isGatewayError = (value: unknown): value is GraphQLError =>
   typeof (value as GraphQLError).extensions.code === 'string';
 const pocketErrorCodes = Object.values(InternalErrorCode);
 const apolloErrorCodes = Object.values(ApolloServerErrorCode);
-const gatewayUnmaskedErrors: string[] = [
-  ...new Set([...pocketErrorCodes, ...apolloErrorCodes]),
-];
+const gatewayUnmaskedErrors = new Set<string>([
+  ...pocketErrorCodes,
+  ...apolloErrorCodes,
+]);
+
 /**
  * Used for formatting errors returned to the client. Hide any
  * errors that might reveal server details. Handle special cases
@@ -49,7 +51,7 @@ export function errorHandler(
     return formattedError;
   } else if (
     isGatewayError(error) &&
-    gatewayUnmaskedErrors.indexOf(error.extensions.code as string) > -1
+    gatewayUnmaskedErrors.has(error.extensions.code as string)
   ) {
     return formattedError;
   } else {
