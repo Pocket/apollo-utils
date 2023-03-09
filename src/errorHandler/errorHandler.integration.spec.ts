@@ -1,4 +1,8 @@
-import { errorHandler, NotFoundError } from './errorHandler';
+import {
+  errorHandler,
+  gatewayErrorHandler,
+  NotFoundError,
+} from './errorHandler';
 import { ApolloGateway, RemoteGraphQLDataSource } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
@@ -50,7 +54,7 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({
+const subgraphServer = new ApolloServer({
   schema: buildSubgraphSchema({ typeDefs, resolvers }),
   plugins: [ApolloServerPluginUsageReportingDisabled()],
   formatError: errorHandler,
@@ -59,13 +63,6 @@ const server = new ApolloServer({
     graphVariant: 'current',
   },
 });
-
-const logger = {
-  warn: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
-  info: jest.fn(),
-};
 
 const gatewayServer = new ApolloServer({
   gateway: new ApolloGateway({
@@ -77,36 +74,35 @@ const gatewayServer = new ApolloServer({
         url,
       });
     },
-    logger,
   }),
   plugins: [ApolloServerPluginUsageReportingDisabled()],
-  formatError: errorHandler,
+  formatError: gatewayErrorHandler,
   apollo: {
     key: undefined, //If you have APOLLO_KEY set Apollo won't start the server in tests
     graphVariant: 'current',
   },
 });
 
-const app: Application = express();
+const subgraph: Application = express();
 const gateway: Application = express();
 
 describe('Server & Gateway error handling: ', () => {
   beforeAll(async () => {
-    await server.start();
-    app.use(express.json());
-    app.use('/', expressMiddleware(server));
-    app.listen(3000, () => console.log('Listening at port 3000'));
+    await subgraphServer.start();
+    subgraph.use(express.json());
+    subgraph.use('/', expressMiddleware(subgraphServer));
+    subgraph.listen(3000, () => console.log('Listening at port 3000'));
     await gatewayServer.start();
     gateway.use(express.json());
     gateway.use('/', expressMiddleware(gatewayServer));
   });
   afterAll(async () => {
-    await server.stop();
+    await subgraphServer.stop();
     await gatewayServer.stop();
   });
 
   it('subgraph - found book works', async () => {
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query: 'query { foundBook { title } }' })
       .expect(200);
@@ -115,7 +111,7 @@ describe('Server & Gateway error handling: ', () => {
   });
 
   it('subgraph - return generic server error if not special case works', async () => {
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query: 'query { books { title } }' })
       .expect(200);
@@ -127,7 +123,7 @@ describe('Server & Gateway error handling: ', () => {
   });
 
   it('subgraph - return custom error works', async () => {
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query: 'query { lostBook { title } }' })
       .expect(200);
@@ -156,7 +152,7 @@ describe('Server & Gateway error handling: ', () => {
             }
         }
     `;
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query })
       .expect(200);
@@ -195,7 +191,7 @@ describe('Server & Gateway error handling: ', () => {
   });
 
   it('subgraph - does not mask GraphQL parsing errors', async () => {
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query: 'query { lostBook { } }' })
       .expect(400);
@@ -212,7 +208,7 @@ describe('Server & Gateway error handling: ', () => {
   });
 
   it('subgraph - does not mask GraphQL validation errors', async () => {
-    const res: request.Response = await request(app)
+    const res: request.Response = await request(subgraph)
       .post('/')
       .send({ query: 'query { badBook { title } }' })
       .expect(200);

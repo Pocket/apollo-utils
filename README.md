@@ -27,6 +27,24 @@ const server = new ApolloServer({
 });
 ```
 
+- If you are setting this up in Apollo gateway, you want to use the gatewayErrorHandler
+
+```typescript
+const gatewayServer = new ApolloServer({
+  gateway: new ApolloGateway({
+    supergraphSdl: readFileSync(
+      './src/errorHandler/local-supergraph.graphql'
+    ).toString(),
+    buildService({ url }) {
+      return new RemoteGraphQLDataSource({
+        url,
+      });
+    },
+  }),
+  formatError: gatewayErrorHandler,
+});
+```
+
 - Throwing custom error
 
 ```typescript

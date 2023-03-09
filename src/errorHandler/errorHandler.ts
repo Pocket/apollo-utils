@@ -70,6 +70,35 @@ export function errorHandler(
 }
 
 /**
+ * Used for formatting errors returned to the gateway from subgraphs specifically.
+ * Errors sent from the subgraphs (when using the remote data sources over HTTP)
+ * lose Javascript class context, which we rely on for errorHandler processing.
+ * This approach re-instatiates the class contexts at a generic GraphQLError level
+ * then passes back to the regular Errorhandler.
+ * @param formattedError original formattedError from gateway processing
+ * @param error original GraphQL Error, which errorHander wants to have class typing
+ */
+export function gatewayErrorHandler(
+  formattedError: GraphQLFormattedError,
+  error: unknown
+): GraphQLFormattedError {
+  if (
+    isGatewayError(error) &&
+    gatewayUnmaskedErrors.has(error.extensions.code as string)
+  ) {
+    // This isn't ideal, since in the subgraphs these error classes would be more specific,
+    // but for the sake of using the subgraphs errorHandler to do checks via class type &&
+    // having our subgraph error blobs be processed correctly by that apollo-utils errorHandler,
+    // this just recreates the errors as a generic GraphQL Error w/all the original details.
+    const reworkedError = new GraphQLError(error.message, {
+      ...error,
+    });
+    return errorHandler(formattedError, reworkedError);
+  }
+  return errorHandler(formattedError, error);
+}
+
+/**
  * CustomGraphQLError exists for providing common extensions for all
  * custom internal errors. Otherwise, all implementation is just relying
  * on GraphQLError
