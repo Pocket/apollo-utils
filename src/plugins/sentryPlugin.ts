@@ -1,5 +1,9 @@
 import * as Sentry from '@sentry/node';
-import { ApolloServerPlugin, BaseContext, GraphQLRequestListener } from '@apollo/server';
+import {
+  ApolloServerPlugin,
+  BaseContext,
+  GraphQLRequestListener,
+} from '@apollo/server';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import { InternalErrorCode } from '../errorHandler/errorHandler';
 
@@ -61,7 +65,8 @@ export const sentryPlugin: ApolloServerPlugin<BaseContext> = {
             scope.setExtra('query', ctx.request.query);
             scope.setExtra('variables', JSON.stringify(ctx.request.variables));
             // If present, add request id from request headers (passed down from gateway/router)
-            const requestId = ctx.request.http?.headers.get('x-graph-request-id')
+            const requestId =
+              ctx.request.http?.headers.get('x-graph-request-id');
             if (requestId !== undefined) {
               scope.setTag('graphRequestId', requestId);
             }
