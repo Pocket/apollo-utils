@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { ApolloServerPlugin } from '@apollo/server';
+import { ApolloServerPlugin, BaseContext, GraphQLRequestListener } from '@apollo/server';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import { InternalErrorCode } from '../errorHandler/errorHandler';
 
@@ -35,8 +35,8 @@ const NO_REPORT_ERRORS = new Set<string>([
  * query sent by client)
  */
 //Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
-export const sentryPlugin: ApolloServerPlugin = {
-  async requestDidStart() {
+export const sentryPlugin: ApolloServerPlugin<BaseContext> = {
+  async requestDidStart(): Promise<GraphQLRequestListener<BaseContext>> {
     /* Within this returned object, define functions that respond
                  to request-specific lifecycle events. */
     return {
@@ -46,14 +46,12 @@ export const sentryPlugin: ApolloServerPlugin = {
         if (!ctx.operation) {
           return;
         }
-
         for (const err of ctx.errors) {
           // Only report internal server errors,
           // all errors extending ApolloError should be user-facing
           if (NO_REPORT_ERRORS.has(err.extensions?.code?.toString())) {
             continue;
           }
-
           // Add scoped report details and send to Sentry
           Sentry.withScope((scope) => {
             // Annotate whether failing operation was query/mutation/subscription
@@ -62,7 +60,11 @@ export const sentryPlugin: ApolloServerPlugin = {
             // Log query and variables as extras (make sure to strip out sensitive data!)
             scope.setExtra('query', ctx.request.query);
             scope.setExtra('variables', JSON.stringify(ctx.request.variables));
-
+            // If present, add request id from request headers (passed down from gateway/router)
+            const requestId = ctx.request.http?.headers.get('x-graph-request-id')
+            if (requestId !== undefined) {
+              scope.setTag('graphRequestId', requestId);
+            }
             if (err.path) {
               // We can also add the path as breadcrumb
               scope.addBreadcrumb({
