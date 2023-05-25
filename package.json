@@ -41,7 +41,7 @@
     "@apollo/utils.keyvaluecache": "2.1.1",
     "@jest/globals": "29.5.0",
     "@sentry/node": "^7.26.0",
-    "deep-equal-in-any-order": "^1.1.13",
+    "deep-equal-in-any-order": "^2.0.0",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
     "ioredis": "5.2.4",
