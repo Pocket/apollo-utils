@@ -44,7 +44,7 @@
     "deep-equal-in-any-order": "^2.0.0",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
-    "ioredis": "5.2.4",
+    "ioredis": "5.3.2",
     "luxon": "^3.2.1",
     "md5": "^2.3.0"
   },
