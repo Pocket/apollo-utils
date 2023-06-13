@@ -6,6 +6,9 @@ import {
 } from '@apollo/server';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import { InternalErrorCode } from '../errorHandler/errorHandler';
+import { setLogger } from '@pocket-tools/ts-logger';
+
+export const defaultLogger = setLogger();
 
 /**
  * This is a list of error codes to not report in the sentry
@@ -38,40 +41,62 @@ const NO_REPORT_ERRORS = new Set<string>([
  * before the query could start (e.g. syntax error in graphql
  * query sent by client)
  */
-//Copied from https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
+// See https://blog.sentry.io/2020/07/22/handling-graphql-errors-using-sentry
 export const sentryPlugin: ApolloServerPlugin<BaseContext> = {
   async requestDidStart(): Promise<GraphQLRequestListener<BaseContext>> {
-    /* Within this returned object, define functions that respond
-                 to request-specific lifecycle events. */
     return {
       async didEncounterErrors(ctx) {
-        // If we couldn't parse the operation, don't
-        // do anything here
         if (!ctx.operation) {
           return;
         }
         for (const err of ctx.errors) {
           // Only report internal server errors,
-          // all errors extending ApolloError should be user-facing
+          // errors extending ApolloError should be user-facing
           if (NO_REPORT_ERRORS.has(err.extensions?.code?.toString())) {
             continue;
           }
-          // Add scoped report details and send to Sentry
-          Sentry.withScope((scope) => {
-            // Annotate whether failing operation was query/mutation/subscription
-            scope.setTag('kind', ctx.operation.operation);
 
-            // Log query and variables as extras (make sure to strip out sensitive data!)
-            scope.setExtra('query', ctx.request.query);
-            scope.setExtra('variables', JSON.stringify(ctx.request.variables));
-            // If present, add request id from request headers (passed down from gateway/router)
-            const requestId =
-              ctx.request.http?.headers.get('x-graph-request-id');
+          const operationKind = ctx.operation.operation;
+          const operationQuery = ctx.request.query;
+          const operationVariablesJson = JSON.stringify(ctx.request.variables);
+          const requestId = ctx.request.http?.headers.get('x-graph-request-id');
+          const requestTraceId = ctx.request.http?.headers.get('x-amzn-trace');
+          const requestUserId = ctx.request.http?.headers.get('userid');
+
+          const errorData = {
+            context: ctx, // contains most of the following, but move some fields up for easier filtering
+            operationKind,
+            operationQuery,
+            operationVariables: operationVariablesJson,
+            requestId,
+            traceId: requestTraceId,
+            userId: requestUserId,
+          };
+
+          // log error
+          defaultLogger.error({
+            data: errorData,
+            error: err,
+            message: err.message,
+            stack: err.stack, // parity with Sentry setup
+          });
+
+          Sentry.withScope((scope) => {
+            // kind of operation == query/mutation/subscription
+            scope.setTag('kind', operationKind);
+            scope.setExtra('query', operationQuery);
+            scope.setExtra('variables', operationVariablesJson);
+
             if (requestId !== undefined) {
               scope.setTag('graphRequestId', requestId);
             }
+            if (requestTraceId !== undefined) {
+              scope.setTag('traceId', requestTraceId);
+            }
+            if (requestUserId !== undefined) {
+              scope.setTag('userId', requestUserId);
+            }
             if (err.path) {
-              // We can also add the path as breadcrumb
               scope.addBreadcrumb({
                 category: 'query-path',
                 message: err.path.join(' > '),
@@ -79,8 +104,7 @@ export const sentryPlugin: ApolloServerPlugin<BaseContext> = {
               });
             }
 
-            //logs error to cloudwatch and sentry
-            console.log(err);
+            // report error
             Sentry.captureException(err);
           });
         }
