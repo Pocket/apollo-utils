@@ -10,9 +10,9 @@ import { NotFoundError } from './errorHandler';
 import sinon from 'sinon';
 import * as Sentry from '@sentry/node';
 import deepEqualInAnyOrder from 'deep-equal-in-any-order';
-
 import { ApolloServerPluginUsageReportingDisabled } from '@apollo/server/plugin/disabled';
 import { GraphQLError } from 'graphql';
+import { defaultLogger } from '../plugins/sentryPlugin';
 
 chai.use(deepEqualInAnyOrder);
 
@@ -67,11 +67,11 @@ const server = new ApolloServer({
 });
 
 describe('Server error handling: ', () => {
-  const consoleSpy = sinon.spy(console, 'log');
+  const logErrorSpy = sinon.spy(defaultLogger, 'error');
   const sentrySpy = sinon.spy(Sentry, 'captureException');
 
   afterEach(() => {
-    consoleSpy.resetHistory();
+    logErrorSpy.resetHistory();
     sentrySpy.resetHistory();
   });
 
@@ -94,13 +94,13 @@ describe('Server error handling: ', () => {
     // Just passing through, so check if not undefined
     expect(error.path).to.not.be.undefined;
     expect(error.locations).to.not.be.undefined;
-    // Check the original error got logged and sent to sentry
-    [consoleSpy, sentrySpy].forEach((spy) => {
+    // Check the error got logged & reported to Sentry
+    [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.calledOnce).to.be.true;
       expect(spy.getCall(0).args[0].message).to.contain(
         "Cannot read properties of null (reading 'data')"
       );
-      expect(spy.getCall(0).args[0].stack).to.not.be.undefined;
+      expect(logErrorSpy.getCall(0).args[0].stack).to.not.be.undefined;
     });
   });
 
@@ -124,7 +124,7 @@ describe('Server error handling: ', () => {
     expect(error.path).to.not.be.undefined;
     expect(error.locations).to.not.be.undefined;
     //not logging not-found errors
-    [consoleSpy, sentrySpy].forEach((spy) => {
+    [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
     });
   });
@@ -176,7 +176,7 @@ describe('Server error handling: ', () => {
     assert(res.errors !== undefined);
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Cannot query field');
-    [consoleSpy, sentrySpy].forEach((spy) => {
+    [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
     });
   });
@@ -194,7 +194,7 @@ describe('Server error handling: ', () => {
 
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('Syntax Error');
-    [consoleSpy, sentrySpy].forEach((spy) => {
+    [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
     });
   });
@@ -213,7 +213,7 @@ describe('Server error handling: ', () => {
     expect(res.errors.length).to.equal(1);
     expect(res.errors[0].message).to.contain('graphql error');
     // user error - shouldn't be logged
-    [consoleSpy, sentrySpy].forEach((spy) => {
+    [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.callCount).to.equal(0);
     });
   });
