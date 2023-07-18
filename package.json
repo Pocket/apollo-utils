@@ -38,7 +38,7 @@
   "dependencies": {
     "@apollo/server": "^4.2.2",
     "@apollo/subgraph": "^2.2.2",
-    "@apollo/utils.keyvaluecache": "2.1.1",
+    "@apollo/utils.keyvaluecache": "3.0.0",
     "@jest/globals": "29.5.0",
     "@pocket-tools/ts-logger": "^1.2.1",
     "@sentry/node": "^7.26.0",
