@@ -40,7 +40,7 @@ function getSomethingDeleted(_parent, args, _contextValue, _info) {
   }
   return fakeData.find(
     (something) =>
-      something.deletedAt?.toISOString() === args.date.toISOString()
+      something.deletedAt?.toISOString() === args.date.toISOString(),
   );
 }
 
@@ -139,7 +139,7 @@ describe('isoStringScalar ApolloServer usage', () => {
         line: 5,
       });
       expect(result.errors[0].message).toBe(
-        'Invalid Data Store Response: invalid Date object'
+        'Invalid Data Store Response: invalid Date object',
       );
       expect(result.errors[0].path).toStrictEqual(['something', 'deletedAt']);
     });
@@ -176,7 +176,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
       expect(result.errors[0].message).toBe(
-        'Variable "$date" got invalid value "10/21/2008"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Variable "$date" got invalid value "10/21/2008"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid MySQL date in, error out', async () => {
@@ -188,7 +188,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
       expect(result.errors[0].message).toBe(
-        'Variable "$date" got invalid value "2008-10-21 13:57:01"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Variable "$date" got invalid value "2008-10-21 13:57:01"; Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid type in, error out', async () => {
@@ -200,7 +200,7 @@ describe('isoStringScalar ApolloServer usage', () => {
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT');
       expect(result.errors[0].message).toBe(
-        'Variable "$date" got invalid value 2023; Invalid User Input: ISOString Scalar parse expected a value of type string or null'
+        'Variable "$date" got invalid value 2023; Invalid User Input: ISOString Scalar parse expected a value of type string or null',
       );
     });
   });
@@ -256,10 +256,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe(
-        'GRAPHQL_VALIDATION_FAILED'
+        'GRAPHQL_VALIDATION_FAILED',
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid MySQL date in, error out', async () => {
@@ -277,10 +277,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe(
-        'GRAPHQL_VALIDATION_FAILED'
+        'GRAPHQL_VALIDATION_FAILED',
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid type in, error out', async () => {
@@ -298,10 +298,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe(
-        'GRAPHQL_VALIDATION_FAILED'
+        'GRAPHQL_VALIDATION_FAILED',
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
+        'Invalid User Input: ISOString Scalar parse expected a value of type string or null',
       );
     });
     it('invalid 0000-00-00 date format in, error out', async () => {
@@ -319,10 +319,10 @@ describe('isoStringScalar ApolloServer usage', () => {
       const result = response.body['singleResult'];
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].extensions.code).toBe(
-        'GRAPHQL_VALIDATION_FAILED'
+        'GRAPHQL_VALIDATION_FAILED',
       );
       expect(result.errors[0].message).toBe(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
   });

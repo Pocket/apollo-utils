@@ -62,10 +62,10 @@ export type BatchFnProps<T, U> = {
  * @param props
  */
 export const multiGetCachedValues = async <T, U>(
-  props: Omit<BatchFnProps<T, U>, 'callback' | 'maxAge' | 'returnTypeKeyFn'>
+  props: Omit<BatchFnProps<T, U>, 'callback' | 'maxAge' | 'returnTypeKeyFn'>,
 ): Promise<U[]> => {
   const keys = props.values.map(
-    (value) => props.cacheKeyPrefix + props.valueKeyFn(value)
+    (value) => props.cacheKeyPrefix + props.valueKeyFn(value),
   );
   const cacheValues = await props.cache.mget(keys.map(props.cache.getKey));
   return cacheValues.map((value) => JSON.parse(value)).filter(Boolean);
@@ -78,14 +78,14 @@ export const multiGetCachedValues = async <T, U>(
  */
 export const multiSetCacheValues = async <U>(
   values: U[],
-  props: Omit<BatchFnProps<any, U>, 'values' | 'valueKeyFn' | 'callback'>
+  props: Omit<BatchFnProps<any, U>, 'values' | 'valueKeyFn' | 'callback'>,
 ): Promise<void> => {
   const cacheValues = values.reduce((acc, value) => {
     if (value) {
       return {
         ...acc,
         [props.cache.getKey(
-          (props.cacheKeyPrefix ?? '') + props.returnTypeKeyFn(value)
+          (props.cacheKeyPrefix ?? '') + props.returnTypeKeyFn(value),
         )]: JSON.stringify(value),
       };
     }
@@ -108,7 +108,7 @@ export const multiSetCacheValues = async <U>(
  */
 export const reorderData = <T, U>(
   data: U[],
-  props: Omit<BatchFnProps<T, U>, 'maxAge' | 'callback'>
+  props: Omit<BatchFnProps<T, U>, 'maxAge' | 'callback'>,
 ): U[] => {
   props.cacheKeyPrefix = props.cacheKeyPrefix ?? '';
 
@@ -117,7 +117,7 @@ export const reorderData = <T, U>(
       return {
         ...acc,
         [props.cache.getKey(
-          props.cacheKeyPrefix + props.returnTypeKeyFn(value)
+          props.cacheKeyPrefix + props.returnTypeKeyFn(value),
         )]: value,
       };
     }
@@ -142,7 +142,7 @@ export const reorderData = <T, U>(
  * @deprecated
  */
 export const batchCacheFn = async <valueType, returnType>(
-  props: BatchFnProps<valueType, returnType>
+  props: BatchFnProps<valueType, returnType>,
 ): Promise<returnType[]> => {
   // set the cache key prefix to empty string as default
   props.cacheKeyPrefix = props.cacheKeyPrefix ?? '';

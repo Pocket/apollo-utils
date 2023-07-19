@@ -23,14 +23,14 @@ export const isoStringScalar = new GraphQLScalarType({
 
     if (!(value instanceof Date)) {
       throw new InternalServerError(
-        'GraphQL ISOString Scalar serializer expected a `Date` object or null'
+        'GraphQL ISOString Scalar serializer expected a `Date` object or null',
       );
     }
 
     // isNaN here checks for 0000-00-00-styled dates, which are invalid, & other invalid
     if (isNaN(value.valueOf())) {
       throw new InternalServerError(
-        'Invalid Data Store Response: invalid Date object'
+        'Invalid Data Store Response: invalid Date object',
       );
     }
 
@@ -54,7 +54,7 @@ export const isoStringScalar = new GraphQLScalarType({
 
     if (!(typeof value === 'string')) {
       throw new UserInputError(
-        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
+        'Invalid User Input: ISOString Scalar parse expected a value of type string or null',
       );
     }
 
@@ -64,7 +64,7 @@ export const isoStringScalar = new GraphQLScalarType({
     const isoDateTime = DateTime.fromISO(value, { setZone: true });
     if (!(isoDateTime.offset === 0) || !isoDateTime.isValid) {
       throw new UserInputError(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     }
 
@@ -80,7 +80,7 @@ export const isoStringScalar = new GraphQLScalarType({
   parseLiteral(ast): Date | null {
     if (!(ast.kind === Kind.STRING)) {
       throw new UserInputError(
-        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
+        'Invalid User Input: ISOString Scalar parse expected a value of type string or null',
       );
     }
 

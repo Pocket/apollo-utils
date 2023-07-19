@@ -98,7 +98,7 @@ describe('Server error handling: ', () => {
     [logErrorSpy, sentrySpy].forEach((spy) => {
       expect(spy.calledOnce).to.be.true;
       expect(spy.getCall(0).args[0].message).to.contain(
-        "Cannot read properties of null (reading 'data')"
+        "Cannot read properties of null (reading 'data')",
       );
       expect(logErrorSpy.getCall(0).args[0].stack).to.not.be.undefined;
     });

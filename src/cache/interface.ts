@@ -25,7 +25,7 @@ export interface CacheInterface extends KeyValueCache {
   set(
     key: string,
     value: string,
-    options?: KeyValueCacheSetOptions
+    options?: KeyValueCacheSetOptions,
   ): Promise<void>;
 
   /**

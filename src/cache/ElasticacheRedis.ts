@@ -23,7 +23,10 @@ export class ElasticacheRedis implements CacheInterface {
    * @param primaryClient
    * @param readerClient
    */
-  constructor(private primaryClient: Redis, private readerClient: Redis) {}
+  constructor(
+    private primaryClient: Redis,
+    private readerClient: Redis,
+  ) {}
 
   /**
    * Generates an md5 hashed cache key from key input
@@ -42,7 +45,7 @@ export class ElasticacheRedis implements CacheInterface {
   async set(
     key: string,
     value: string,
-    options?: KeyValueCacheSetOptions
+    options?: KeyValueCacheSetOptions,
   ): Promise<void> {
     // this default replicates the behavior of the deprecated
     // RedisClient from 'apollo-server-cache-redis'
