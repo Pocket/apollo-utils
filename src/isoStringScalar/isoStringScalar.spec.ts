@@ -40,7 +40,7 @@ describe('isoStringScalar', () => {
       expect(() => {
         isoStringScalar.serialize(otherDateStr);
       }).toThrow(
-        'GraphQL ISOString Scalar serializer expected a `Date` object or null'
+        'GraphQL ISOString Scalar serializer expected a `Date` object or null',
       );
     });
   });
@@ -62,42 +62,42 @@ describe('isoStringScalar', () => {
       expect(() => {
         isoStringScalar.parseValue(mysqlNullDateStr);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid EST-explicit String in, error out', async () => {
       expect(() => {
         isoStringScalar.parseValue(isoESTDateStr);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid ISO with no TZ String in, error out', async () => {
       expect(() => {
         isoStringScalar.parseValue(isoNoTzDateStr);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid MySQL String in, error out', async () => {
       expect(() => {
         isoStringScalar.parseValue(mysqlDateStr);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid other string in, error out', async () => {
       expect(() => {
         isoStringScalar.parseValue(otherDateStr);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid other data type in, error out', async () => {
       expect(() => {
         isoStringScalar.parseValue(1234);
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a value of type string or null'
+        'Invalid User Input: ISOString Scalar parse expected a value of type string or null',
       );
     });
   });
@@ -124,7 +124,7 @@ describe('isoStringScalar', () => {
           value: mysqlNullDateStr,
         });
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('valid EST-explicit AST String in, TS Date object out', async () => {
@@ -134,7 +134,7 @@ describe('isoStringScalar', () => {
           value: isoESTDateStr,
         });
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid ISO no TZ String in, error out', async () => {
@@ -144,7 +144,7 @@ describe('isoStringScalar', () => {
           value: isoNoTzDateStr,
         });
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid MySQL AST String in, error out', async () => {
@@ -154,7 +154,7 @@ describe('isoStringScalar', () => {
           value: mysqlDateStr,
         });
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
     it('invalid other AST String in, error out', async () => {
@@ -164,7 +164,7 @@ describe('isoStringScalar', () => {
           value: otherDateStr,
         });
       }).toThrow(
-        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string'
+        'Invalid User Input: ISOString Scalar parse expected a UTC-based, ISO-8601-compliant string',
       );
     });
   });

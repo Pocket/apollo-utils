@@ -25,7 +25,7 @@ describe('ElasticacheRedis', () => {
     const readerData = { test: '1' };
     const cache = new ElasticacheRedis(
       new Redis(),
-      new Redis({ data: readerData })
+      new Redis({ data: readerData }),
     );
 
     const readerGetSpy = jest.spyOn((cache as any).readerClient, 'get');
@@ -41,7 +41,7 @@ describe('ElasticacheRedis', () => {
     const readerData = { test1: '1', test2: '2' };
     const cache = new ElasticacheRedis(
       new Redis(),
-      new Redis({ data: readerData })
+      new Redis({ data: readerData }),
     );
 
     const readerMgetSpy = jest.spyOn((cache as any).readerClient, 'mget');
@@ -116,7 +116,7 @@ describe('ElasticacheRedis', () => {
     const readerFlushdbSpy = jest.spyOn((cache as any).readerClient, 'flushdb');
     const primaryFlushdbSpy = jest.spyOn(
       (cache as any).primaryClient,
-      'flushdb'
+      'flushdb',
     );
 
     await cache.flush();
@@ -135,7 +135,7 @@ describe('ElasticacheRedis', () => {
     const readerFlushdbSpy = jest.spyOn((cache as any).readerClient, 'flushdb');
     const primaryFlushdbSpy = jest.spyOn(
       (cache as any).primaryClient,
-      'flushdb'
+      'flushdb',
     );
 
     await cache.clear();

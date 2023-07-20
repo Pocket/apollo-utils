@@ -4,7 +4,7 @@ import { PaginationInput } from './types';
 export function validatePagination(
   pagination: PaginationInput,
   defaultPageSize = 30,
-  maxPageSize = 100
+  maxPageSize = 100,
 ): PaginationInput {
   if (pagination == null) {
     return { first: defaultPageSize };
@@ -17,13 +17,13 @@ export function validatePagination(
     (pagination.first && pagination.last)
   ) {
     throw new UserInputError(
-      'Please set either {after and first} or {before and last}'
+      'Please set either {after and first} or {before and last}',
     );
   }
 
   if (pagination.before) {
     const before = parseInt(
-      Buffer.from(pagination.before, 'base64').toString()
+      Buffer.from(pagination.before, 'base64').toString(),
     );
     if (before < 0) {
       throw new UserInputError('Invalid before cursor');

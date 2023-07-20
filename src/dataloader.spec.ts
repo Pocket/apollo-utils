@@ -48,7 +48,7 @@ describe('dataloader', () => {
     mget = FakeCache.prototype.mget = jest
       .fn()
       .mockResolvedValue(
-        batchFnProps.values.map((value) => JSON.stringify(value))
+        batchFnProps.values.map((value) => JSON.stringify(value)),
       );
 
     const result = await dataloader.multiGetCachedValues(batchFnProps);
@@ -70,7 +70,7 @@ describe('dataloader', () => {
           [batchFnProps.cacheKeyPrefix + value.val]: JSON.stringify(value),
         };
       }, {}),
-      batchFnProps.maxAge
+      batchFnProps.maxAge,
     );
   });
 
@@ -90,7 +90,7 @@ describe('dataloader', () => {
       .mockResolvedValue([]);
     const mockMultiSetCacheValues = jest.spyOn(
       dataloader,
-      'multiSetCacheValues'
+      'multiSetCacheValues',
     );
 
     const result = await dataloader.batchCacheFn(batchFnProps);
@@ -107,7 +107,7 @@ describe('dataloader', () => {
       .mockResolvedValue(batchFnProps.values);
     const mockMultiSetCacheValues = jest.spyOn(
       dataloader,
-      'multiSetCacheValues'
+      'multiSetCacheValues',
     );
 
     const result = await dataloader.batchCacheFn(batchFnProps);

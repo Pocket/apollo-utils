@@ -8,21 +8,21 @@ describe('pagination validation', () => {
   it('should throw error if first and last are set', () => {
     const pagination = { first: 100, last: 20 };
     expect(() => validatePagination(pagination)).throw(
-      'Please set either {after and first} or {before and last}'
+      'Please set either {after and first} or {before and last}',
     );
   });
 
   it('should throw error if before and after are set', () => {
     const pagination = { before: 'b_cursor', after: 'a_cursor' };
     expect(() => validatePagination(pagination)).throw(
-      'Please set either {after and first} or {before and last}'
+      'Please set either {after and first} or {before and last}',
     );
   });
 
   it('should throw error if before and first are set', () => {
     const pagination = { before: 'b_cursor', first: 20 };
     expect(() => validatePagination(pagination)).throw(
-      'Please set either {after and first} or {before and last}'
+      'Please set either {after and first} or {before and last}',
     );
   });
 
@@ -30,7 +30,7 @@ describe('pagination validation', () => {
     const before = Buffer.from('-1').toString('base64');
     const pagination = { before: before, last: 10 };
     expect(() =>
-      validatePagination(pagination, defaultPageSize, maxPageSize)
+      validatePagination(pagination, defaultPageSize, maxPageSize),
     ).throw('Invalid before cursor');
   });
 
@@ -39,7 +39,7 @@ describe('pagination validation', () => {
     const actual = validatePagination(
       { before: before },
       defaultPageSize,
-      maxPageSize
+      maxPageSize,
     );
     expect(actual).to.deep.equal({ before: before, last: defaultPageSize });
   });
@@ -49,7 +49,7 @@ describe('pagination validation', () => {
     const actual = validatePagination(
       { before: before, last: -20 },
       defaultPageSize,
-      maxPageSize
+      maxPageSize,
     );
     expect(actual).to.deep.equal({ before: before, last: defaultPageSize });
   });

@@ -26,7 +26,7 @@ export enum InternalErrorCode {
  */
 export function errorHandler(
   formattedError: GraphQLFormattedError,
-  error: unknown
+  error: unknown,
 ): GraphQLFormattedError {
   if (unwrapResolverError(error) instanceof GraphQLError) {
     // Keep GraphQL errors intact
