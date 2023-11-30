@@ -1,29 +1,46 @@
-name: Node.js Package
-
+name: Node.js Package 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
-
+    push:
+      branches: ["main"]  
+    pull_request:
+      branches: ["main"]  
 jobs:
-  build:
+  ##
+  # Runs semantic release in a regular
+  ##
+  release:
+    name: Semantic Release
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+
+    # https://github.com/semantic-release/npm
+    permissions:
+        contents: write # to be able to publish a GitHub release
+        issues: write # to be able to comment on released issues
+        pull-requests: write # to be able to comment on released pull requests
+        id-token: write # to enable use of OIDC for npm provenance
+
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3
-      - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+      - name: Check out code
+        uses: actions/checkout@v4
         with:
-          node-version: '16.x'
+          fetch-depth: 2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
-          scope: '@pocket-tools'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run test
+      - run: npm install -g npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      - name: Build
+        run: npm run build 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@8e58d20d0f6c8773181f43eb74d6a05e3099571d # v3.4.2
+        run: npm run release 
         env:
-          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+            NPM_CONFIG_PROVENANCE: true
