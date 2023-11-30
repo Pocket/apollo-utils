@@ -1,5 +1,5 @@
-import express from 'express';
 import * as Sentry from '@sentry/node';
+import http from 'http';
 
 /**
  * Sets common variables for Sentry tracing
@@ -9,8 +9,10 @@ import * as Sentry from '@sentry/node';
  * ```
  * @param req Express request
  */
-export const sentryPocketMiddleware: express.RequestHandler = (
-  req: express.Request,
+export const sentryPocketMiddleware = (
+  req: http.IncomingMessage,
+  _ : http.ServerResponse,
+  next: (error?: any) => void,
 ) => {
   // Set tracking data for Sentry
   Sentry.configureScope((scope) => {
@@ -21,4 +23,5 @@ export const sentryPocketMiddleware: express.RequestHandler = (
       ip_address: (req.headers.gatewayipaddress as string) || undefined,
     });
   });
+  next();
 };
