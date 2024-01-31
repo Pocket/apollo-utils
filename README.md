@@ -1,5 +1,8 @@
 # Apollo Utilities
 
+> [!IMPORTANT]  
+> This repo has been moved to [Pocket's Monorepo](https://github.com/Pocket/pocket-monorepo/tree/main/packages/apollo-utils)
+
 We use this repository as a place to keep code we use across our apollo implementing services' repositories.
 These include plugins, dataloader functions, etc.
 
